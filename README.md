@@ -42,7 +42,7 @@ A sample credentials file pointing at the bundled local Neo4j is available at `l
 
 ## Sanity Checks/Some Tips
 
-Neo4j's native graph visualiser (Bloom) does not make the incorporation of custom edge relationship names obvious. While the graph may still show generic 'MENTIONS' and 'RELATES_TO' labels on edges, you can set the caption type to the name of the edhe or odouble-check that your custom edges were inferred and incorporated by running the following Cypher query:
+Neo4j's native graph visualiser (Bloom) does not make the incorporation of custom edge relationship names obvious. While the graph may still show generic 'MENTIONS' and 'RELATES_TO' labels on edges, you can set the caption type to the name of the edge or double-check that your custom edges were inferred and incorporated by running the following Cypher query:
 ```
   MATCH ()-[r:RELATES_TO]->()
   RETURN DISTINCT r.name AS edge_type, count(*) AS n
