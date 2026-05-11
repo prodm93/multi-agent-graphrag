@@ -22,6 +22,7 @@ Users supply their own Neo4j AuraDB credentials and OpenAI API key through the a
 - Improve the playbook source content for retrieval planning
 - Make the retrieval planning agent system prompt more robust & add pointed instructions
 - Include support for non-openAI models
+- Integrate LangSmith for agent traceability and observability
 
 
 ## Run the app
