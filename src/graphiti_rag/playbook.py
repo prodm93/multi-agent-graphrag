@@ -1,28 +1,18 @@
 """Retrieval strategy playbook used by the planner agent.
 
-The playbook is a single text block describing the available retrieval
-strategies, when each is the right choice, and the Graphiti API surface
-they wrap. The :class:`RetrievalPlannerAgent` feeds this into its LLM
-prompt at every query so the agent can pick a strategy without us
-hardcoding a router.
+A single text block describing the available retrieval strategies, when
+each is the right choice, and the Graphiti API surface they wrap. The
+:class:`RetrievalPlannerAgent` feeds this into its LLM prompt at every
+query so the agent can pick a strategy without us hardcoding a router.
 
-Two modes:
-
-* **Static** (default) — :data:`STATIC_PLAYBOOK` below, curated by hand.
-* **Dynamic** — set ``GRAPHITI_PLAYBOOK_DYNAMIC=true`` and provide a
-  web-search-capable client; :func:`_generate_dynamic_playbook` is a
-  stub for that path. Falls back to static on any failure.
+This module is intentionally minimal. A future revision may regenerate
+the playbook dynamically from web search; until that path is built and
+tested, no toggle exists.
 """
 from __future__ import annotations
 
-import logging
-import os
-from typing import Any
 
-logger = logging.getLogger(__name__)
-
-
-STATIC_PLAYBOOK = """\
+PLAYBOOK = """\
 # Retrieval Strategies for Graphiti-backed GraphRAG
 
 You pick ONE strategy per user query. Each strategy wraps a Graphiti or
@@ -100,36 +90,3 @@ Query: "tell me everything about KEYNOTE-006"
   "reason": "Single named subject, exhaustive ask."
 }
 """
-
-
-async def load_playbook(client: Any | None = None) -> str:
-    """Return the playbook text the planner agent should use.
-
-    Honours ``GRAPHITI_PLAYBOOK_DYNAMIC=true`` for the dynamic path; the
-    dynamic generator is currently a stub that falls back to static. Wire
-    your web-search-capable client into :func:`_generate_dynamic_playbook`
-    when ready.
-    """
-    if os.environ.get("GRAPHITI_PLAYBOOK_DYNAMIC", "").lower() != "true":
-        return STATIC_PLAYBOOK
-    try:
-        return await _generate_dynamic_playbook(client)
-    except Exception:
-        logger.exception("Dynamic playbook generation failed; using static")
-        return STATIC_PLAYBOOK
-
-
-async def _generate_dynamic_playbook(client: Any | None) -> str:
-    """Stub for web-search-driven playbook generation.
-
-    Implement by pointing ``client`` at a web-search-capable LLM (OpenAI
-    Responses API with the ``web_search`` tool, an Anthropic client with
-    a search tool, etc.), prompting it to summarise Graphiti's current
-    retrieval API + general graph-traversal guidance, and returning the
-    summary text. Until then this stub raises so :func:`load_playbook`
-    falls back to :data:`STATIC_PLAYBOOK`.
-    """
-    raise NotImplementedError(
-        "Dynamic playbook generation is not yet wired. "
-        "Unset GRAPHITI_PLAYBOOK_DYNAMIC or implement this function."
-    )

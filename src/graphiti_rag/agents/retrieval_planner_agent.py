@@ -31,9 +31,15 @@ class RetrievalPlannerAgent:
     ) -> None:
         self._config = config
         self._playbook = playbook
-        self._client = client if client is not None else AsyncOpenAI(
-            api_key=config.openai_api_key
-        )
+        # Constructed on first .plan() call when not supplied — keeps any
+        # credential problems out of agent construction so the caller's
+        # fallback path can absorb them uniformly with other LLM errors.
+        self._client = client
+
+    def _ensure_client(self) -> AsyncOpenAI:
+        if self._client is None:
+            self._client = AsyncOpenAI(api_key=self._config.openai_api_key)
+        return self._client
 
     async def plan(self, query: str) -> RetrievalPlan:
         if not query.strip():
@@ -47,7 +53,8 @@ class RetrievalPlannerAgent:
         user = f"{self._playbook}\n\nUser query: {query}"
 
         try:
-            completion = await self._client.chat.completions.create(
+            client = self._ensure_client()
+            completion = await client.chat.completions.create(
                 model=self._config.openai_model,
                 messages=[
                     {"role": "system", "content": system},

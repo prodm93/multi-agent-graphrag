@@ -51,6 +51,10 @@ class ContextAgent:
             rendered = await self._run_plan(query, plan)
             if rendered != EMPTY_CONTEXT:
                 return rendered
+            # If the plan already ran the fallback strategy, re-running it
+            # would just repeat the same empty result.
+            if plan.strategy == "centered_rerank":
+                return rendered
             logger.warning("Planned retrieval returned empty context; falling back")
         except Exception:
             logger.exception("Planned retrieval failed; falling back")
@@ -67,7 +71,7 @@ class ContextAgent:
 
     async def _run_edge_hybrid(self, query: str) -> str:
         group_id = self._config.graphiti_namespace
-        edges = await self._graph_tools.search_edges(
+        edges = await self._graph_tools.edges.search_edges(
             query=query,
             group_id=group_id,
             limit=EDGE_LIMIT,
@@ -76,7 +80,7 @@ class ContextAgent:
 
     async def _run_centered_rerank(self, query: str) -> str:
         group_id = self._config.graphiti_namespace
-        edges = await self._graph_tools.search_edges(
+        edges = await self._graph_tools.edges.search_edges(
             query=query,
             group_id=group_id,
             limit=EDGE_LIMIT,
@@ -85,7 +89,7 @@ class ContextAgent:
             return EMPTY_CONTEXT
 
         anchor = edges[0].source_id
-        reranked = await self._graph_tools.search_edges(
+        reranked = await self._graph_tools.edges.search_edges(
             query=query,
             group_id=group_id,
             limit=EDGE_LIMIT,
@@ -97,14 +101,14 @@ class ContextAgent:
         if not entity_name.strip():
             return EMPTY_CONTEXT
         group_id = self._config.graphiti_namespace
-        nodes = await self._graph_tools.find_entity_by_name(
+        nodes = await self._graph_tools.nodes.find_entity_by_name(
             entity_name=entity_name,
             group_id=group_id,
             limit=1,
         )
         if not nodes:
             return EMPTY_CONTEXT
-        edges = await self._graph_tools.fetch_edges(
+        edges = await self._graph_tools.edges.fetch_edges(
             node_id=nodes[0].id,
             group_id=group_id,
             limit=EDGE_LIMIT,
@@ -118,7 +122,7 @@ class ContextAgent:
         endpoint_uuids = list(
             {e.source_id for e in edges} | {e.target_id for e in edges}
         )
-        name_by_uuid = await self._graph_tools.fetch_node_names(
+        name_by_uuid = await self._graph_tools.nodes.fetch_node_names(
             uuids=endpoint_uuids,
             group_id=group_id,
         )
@@ -135,7 +139,7 @@ class ContextAgent:
             if len(episode_order) >= MAX_CHUNKS:
                 break
 
-        chunks = await self._graph_tools.fetch_episode_chunks(
+        chunks = await self._graph_tools.episodes.fetch_episode_chunks(
             episode_uuids=episode_order,
             group_id=group_id,
         )

@@ -29,7 +29,7 @@ from graphiti_rag.config import Config
 from graphiti_rag.domain import IngestResult
 from graphiti_rag.graph.graphiti_client import GraphitiClient
 from graphiti_rag.graph.neo4j_client import Neo4jClient
-from graphiti_rag.playbook import STATIC_PLAYBOOK
+from graphiti_rag.playbook import PLAYBOOK
 from graphiti_rag.schemas.ontology import OntologyDefinition
 from graphiti_rag.tools.document_loader import DocumentLoader
 from graphiti_rag.tools.graph_tools import GraphTools
@@ -80,7 +80,7 @@ class Pipeline:
         loader = DocumentLoader()
         graph_tools = GraphTools(graphiti, neo4j)
         try:
-            planner_agent = RetrievalPlannerAgent(config, STATIC_PLAYBOOK)
+            planner_agent = RetrievalPlannerAgent(config, PLAYBOOK)
         except Exception:
             logger.exception(
                 "Retrieval planner construction failed; using deterministic retrieval"
@@ -95,7 +95,6 @@ class Pipeline:
             neo4j_client=neo4j,
             graphiti_client=graphiti,
         )
-
 
     def _build_ingest_graph(self) -> StateGraph:
         builder = StateGraph(IngestState)
