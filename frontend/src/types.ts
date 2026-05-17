@@ -22,3 +22,5 @@ export interface IngestResponse {
 export interface QueryResponse {
   answer: string;
 }
+
+export type ConsentTier = "full" | "anonymised" | "metadata_only";

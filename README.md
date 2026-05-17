@@ -19,15 +19,23 @@ Users supply their own Neo4j AuraDB credentials and OpenAI API key through the a
 
 ### Work-in-Progress
 
-- Improve the playbook source content for retrieval planning
-- Make the retrieval planning agent system prompt more robust & add pointed instructions
+- Improve the playbook source content for retrieval planning further
+- Make the retrieval planning agent system prompt even more robust & add pointed instructions
 - Include support for non-openAI models
-- Integrate LangSmith for agent traceability and observability
+- Host the app so end users no longer need to clone-and-run (see _Observability & privacy_ below)
+
+## Observability & privacy
+
+The app supports LangSmith for agent tracing and observability. In this clone-and-run distribution, however, tracing is **developer-side only**. The FastAPI server only emits traces if its own process environment contains a valid `LANGSMITH_API_KEY`. End users running the app on their own machine do not have such a key and so no data ever leaves their machine.
+
+A privacy modal is included that offers three data-sharing tiers (full, anonymised, metadata-only) backed by LangSmith's `anonymizer` callable and `hide_inputs` / `hide_outputs` switches. The choice flows end-to-end through `POST /api/consent` → `AppState.consent_tier` → the per-agent `wrap_openai(..., tracing_extra={"client": ls_client})` calls. In a clone-and-run build the wiring is _shadow live_ — fully exercised, but inert because no traces are being emitted in the first place. It becomes load-bearing the moment the app is hosted with a real LangSmith key (a future direction; see Work-in-Progress).
+
+The modal is soft; it appears once on first visit, can be dismissed without choosing, and can be reopened any time from the **Privacy** link in the sidebar.
 
 
 ## Run the app
 
-Creating a Neo4j account and setting up an AuraDB instance on the console is the easiest way to get set up with the knowledge graph. At the time of creation, you will be given the option to download your credentials to disk in a .txt file. It's strongly suggested to do so since you're only shown your credentials once, and it will come in handy for connectting to the database on the app.
+Creating a Neo4j account and setting up an AuraDB instance on the console is the easiest way to get set up with the knowledge graph. At the time of creation, you will be given the option to download your credentials to disk in a .txt file. It's strongly suggested to do so since you're only shown your credentials once, and it will come in handy for connectting to the database on the app. **Please ensure your Neo4j database/AuraDB instance is unpaused prior to querying.**
 
 1. Install Docker Desktop (or OrbStack, this repo author's personal lightweight favourite)
 2. `cd` into the repo root in terminal, then `docker compose up --build`

@@ -44,6 +44,15 @@ class Config(BaseSettings):
     # Graphiti
     graphiti_namespace: str = "default"
 
+    # LangSmith (developer-only observability). All four fields are managed
+    # by the developer's `.env`; end users never see them. The startup
+    # probe in api/app.py forces ``langsmith_tracing`` off if the key
+    # fails to authenticate, regardless of what `.env` says.
+    langsmith_api_key: str = ""
+    langsmith_project: str = ""
+    langsmith_tracing: bool = False
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+
     @model_validator(mode="after")
     def _derive_aura_uri(self) -> "Config":
         if (

@@ -74,7 +74,7 @@ export function DocumentUpload() {
       if (!ALLOWED_SUFFIXES.has(suffix)) {
         rejected.push({
           filename: f.name,
-          reason: `Unsupported file type ".${suffix || "unknown"}" — allowed: ${[...ALLOWED_SUFFIXES].sort().join(", ")}`,
+          reason: `Unsupported file type ".${suffix || "unknown"}"; allowed: ${[...ALLOWED_SUFFIXES].sort().join(", ")}`,
         });
         continue;
       }

@@ -6,6 +6,7 @@ import type { CredentialsPayload } from "../types";
 interface SidebarProps {
   open: boolean;
   onToggle: () => void;
+  onOpenPrivacy: () => void;
 }
 
 const EMPTY_FORM: CredentialsPayload = {
@@ -18,7 +19,7 @@ const EMPTY_FORM: CredentialsPayload = {
   openaiKey: "",
 };
 
-export function Sidebar({ open, onToggle }: SidebarProps) {
+export function Sidebar({ open, onToggle, onOpenPrivacy }: SidebarProps) {
   const { isReady, setReady } = useCredentials();
   const [form, setForm] = useState<CredentialsPayload>(EMPTY_FORM);
   const [error, setError] = useState<string>("");
@@ -130,7 +131,7 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
           aria-describedby={error !== "" ? "creds-error" : undefined}
         />
         <p className="hint">
-          Upload the Aura .txt to auto-fill the fields below — or fill them in
+          Upload the Aura .txt to auto-fill the fields below, or fill them in
           manually.
         </p>
       </section>
@@ -234,6 +235,18 @@ export function Sidebar({ open, onToggle }: SidebarProps) {
           aria-hidden="true"
         />
         <span>{isReady ? "Connected" : "Not connected"}</span>
+      </div>
+
+      <div className="sidebar-footer">
+        <button
+          type="button"
+          className="sidebar-privacy"
+          onClick={onOpenPrivacy}
+        >
+          <span className="sidebar-privacy-icon" aria-hidden="true">◆</span>
+          <span className="sidebar-privacy-label">Privacy preferences</span>
+          <span className="sidebar-privacy-chevron" aria-hidden="true">›</span>
+        </button>
       </div>
     </aside>
   );

@@ -1,5 +1,6 @@
 import type {
   AuraCreds,
+  ConsentTier,
   CredentialsPayload,
   IngestResponse,
   QueryResponse,
@@ -103,6 +104,12 @@ export async function setCredentials(
     openai_api_key: payload.openaiKey,
     aura_instanceid: payload.auraInstanceId,
     aura_instancename: payload.auraInstanceName,
+  });
+}
+
+export async function setConsent(tier: ConsentTier): Promise<void> {
+  await apiClient.postJson<{ status: string; tier: string }>("/consent", {
+    tier,
   });
 }
 

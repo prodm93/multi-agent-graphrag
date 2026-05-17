@@ -73,14 +73,25 @@ class Pipeline:
         self._query_graph = self._build_query_graph()
 
     @classmethod
-    def from_config(cls, config: Config) -> "Pipeline":
-        """Convenience factory — wires dependencies from a Config object."""
+    def from_config(
+        cls,
+        config: Config,
+        langsmith_client: object | None = None,
+    ) -> "Pipeline":
+        """Convenience factory — wires dependencies from a Config object.
+
+        ``langsmith_client``, when supplied, is passed to the LLM-calling
+        agents (planner and generator) so each ``wrap_openai`` call attaches
+        the per-tier privacy filters via ``tracing_extra``.
+        """
         neo4j = Neo4jClient(config)
         graphiti = GraphitiClient(config, neo4j)
         loader = DocumentLoader()
         graph_tools = GraphTools(graphiti, neo4j)
         try:
-            planner_agent = RetrievalPlannerAgent(config, PLAYBOOK)
+            planner_agent = RetrievalPlannerAgent(
+                config, PLAYBOOK, langsmith_client=langsmith_client
+            )
         except Exception:
             logger.exception(
                 "Retrieval planner construction failed; using deterministic retrieval"
@@ -91,7 +102,7 @@ class Pipeline:
             ontology_agent=OntologyAgent(config, loader),
             graph_agent=GraphAgent(config, graphiti, loader),
             context_agent=ContextAgent(config, graph_tools, planner_agent),
-            generator_agent=GeneratorAgent(config),
+            generator_agent=GeneratorAgent(config, langsmith_client=langsmith_client),
             neo4j_client=neo4j,
             graphiti_client=graphiti,
         )

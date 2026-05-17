@@ -18,6 +18,7 @@ dependencies = [
     "uvicorn[standard]>=0.29",
     "python-multipart>=0.0.9",
     "openai>=1.30",
+    "langsmith>=0.1",
     "pdfplumber>=0.11",
     "python-docx>=1.1",
     "openpyxl>=3.1",
@@ -34,6 +35,9 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["graphiti_rag*"]
+
+[tool.setuptools.package-data]
+"graphiti_rag.assets" = ["*.md"]
 
 [tool.ruff]
 line-length = 100
